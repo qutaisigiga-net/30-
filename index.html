@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURITY_GATEWAY // SEC-LOG-0x7F</title>
+    <!-- Supabase ბიბლიოთეკა -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            background-color: #050505;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            width: 100%;
+            max-width: 550px;
+            background: rgba(10, 10, 15, 0.95);
+            border: 1px solid #ff3333;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.25);
+            padding: 30px;
+            box-sizing: border-box;
+            border-radius: 4px;
+        }
+        .header {
+            font-size: 13px;
+            color: #ff3333;
+            border-bottom: 1px solid #331111;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .warning-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+        .text {
+            font-size: 13px;
+            color: #a0a0a0;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .terminal-box {
+            background: #000;
+            border: 1px solid #222;
+            padding: 15px;
+            font-size: 12px;
+            color: #00ff66;
+            line-height: 1.5;
+        }
+        .ip-highlight {
+            color: #ff3333;
+            font-weight: bold;
+        }
+        .status-blink {
+            color: #ff3333;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">⚠️ SECURITY ALERT: NODE_BREACH_DETECTED</div>
+        <div class="warning-title">ლინკზე არ უნდა გადმოსულიყავი.</div>
+        <div class="text">
+            სისტემამ დააფიქსირა უსაფრთხოების პროტოკოლის დარღვევა. თქვენი კავშირი ავტომატურად იქნა იდენტიფიცირებული და დაფიქსირებულია უსაფრთხოების რეესტრში.
+        </div>
+        <div class="terminal-box" id="terminal">
+            > Initializing secure handshake...<br>
+            > Capturing peer telemetry...<br>
+            <span id="ip-log-line">> Target IP: Analyzing...</span><br>
+            <span class="status-blink">> STATUS: SESSION FLAGGED & LOGGED.</span>
+        </div>
+    </div>
+
+    <script>
+        // ჩასვი შენი Supabase მონაცემები
+        const SUPABASE_URL = 'https://შენი-პროექტის-აიდი.supabase.co';
+        const SUPABASE_ANON_KEY = 'შენი-anon-public-გასაღები';
+
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function executeProtocol() {
+            try {
+                let response = await fetch('https://api.ipify.org?format=json');
+                let data = await response.json();
+                let userIp = data.ip;
+                let userAgent = navigator.userAgent;
+
+                // ბაზაში ჩაწერა
+                await _supabase.from('visitors').insert([
+                    { ip: userIp, user_agent: userAgent }
+                ]);
+
+                // ეკრანზე გამოტანა
+                document.getElementById('ip-log-line').innerHTML = `> Target IP Captured: <span class="ip-highlight">${userIp}</span>`;
+            } catch (err) {
+                document.getElementById('ip-log-line').innerHTML = `> Target IP Captured: <span class="ip-highlight">SECURED_NODE</span>`;
+            }
+        }
+
+        executeProtocol();
+    </script>
+</body>
+</html>
